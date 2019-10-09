@@ -2,8 +2,8 @@ name: 'Document R packages'
 description: 'Runs roxygen2::roxygenise() on an R package PR'
 author: 'Jim Hester'
 inputs:
-  github-token:
-    description: 'GitHub access token'
+  repo-token:
+    description: 'Token for the repo. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
 runs:
   using: 'node12'
   main: 'lib/main.js'
