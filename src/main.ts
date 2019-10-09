@@ -17,12 +17,12 @@ async function run() {
     }
 
     // Do nothing if its not a pr
-    if (!context.payload.pull_request) {
-      console.log(
-        "The event that triggered this action was not a pull request."
-      );
-      return;
-    }
+    //if (!context.payload.pull_request) {
+    //console.log(
+    //"The event that triggered this action was not a pull request."
+    //);
+    //return;
+    //}
 
     const issue: { owner: string; repo: string; number: number } =
       context.issue;
