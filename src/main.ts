@@ -60,7 +60,12 @@ async function run() {
 
     await exec.exec("git", ["checkout", "-b", headBranch, `pr/${headBranch}`]);
 
-    await exec.exec("Rscript", ["-e", 'roxygen2::roxygenise(".")']);
+    await exec.exec("Rscript", [
+      "-e",
+      'install.packages("roxygen2")',
+      "-e",
+      'roxygen2::roxygenise(".")'
+    ]);
 
     await exec.exec("git", ["add", "man/*", "NAMESPACE"]);
 
