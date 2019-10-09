@@ -1,19 +1,63 @@
-import * as core from '@actions/core';
-import {wait} from './wait'
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+import * as exec from "@actions/exec";
 
 async function run() {
-  try {
-    const ms = core.getInput('milliseconds');
-    console.log(`Waiting ${ms} milliseconds ...`)
+  const client: github.GitHub = new github.GitHub(
+    core.getInput("repo-token", { required: true })
+  );
 
-    core.debug((new Date()).toTimeString())
-    await wait(parseInt(ms));
-    core.debug((new Date()).toTimeString())
+  const context = github.context;
 
-    core.setOutput('time', new Date().toTimeString());
-  } catch (error) {
-    core.setFailed(error.message);
+  const lastComment = context.payload.comment;
+
+  if (!(lastComment && lastComment.body.match("/document"))) {
+    core.setFailed(`No comment matched`);
   }
+
+  // Do nothing if its not a pr
+  if (!context.payload.pull_request) {
+    console.log("The event that triggered this action was not a pull request.");
+    return;
+  }
+
+  const issue: { owner: string; repo: string; number: number } = context.issue;
+
+  console.log(`Collecting information about PR #${issue.number}...`);
+
+  const { status, data: pr } = await client.pulls.get({
+    owner: issue.owner,
+    repo: issue.repo,
+    pull_number: issue.number
+  });
+
+  const baseRepo: string = pr.base.repo.full_name;
+  const headRepo: string = pr.head.repo.full_name;
+  const headBranch: string = pr.head.ref;
+  const headCloneURL: string = pr.head.repo.clone_url;
+
+  await exec.exec("git", ["remote", "add", "pr", headCloneURL]);
+
+  await exec.exec("git", [
+    "config",
+    "--global",
+    "user.email",
+    "action@github.com"
+  ]);
+
+  await exec.exec("git", ["config", "--global", "user.email", "GitHub Action"]);
+
+  await exec.exec("git", ["fetch", "pr", headBranch]);
+
+  await exec.exec("git", ["checkout", "-b", headBranch, `pr/${headBranch}`]);
+
+  await exec.exec("Rscript", ["-e", 'roxygen2::roxygenise(".")']);
+
+  await exec.exec("git", ["add", "man/*", "NAMESPACE"]);
+
+  await exec.exec("git", ["commit", "-m", "Document"]);
+
+  await exec.exec("git", ["push", "pr", `HEAD:${headBranch}`]);
 }
 
 run();
