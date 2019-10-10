@@ -29,9 +29,9 @@ async function run() {
       `https://x-access-token:${token}@`
     );
 
-    await exec.exec("git", ["remote", "add", "pr", headCloneURL2]);
-
-    await exec.exec("git", ["push", "pr", `HEAD:${headBranch}`]);
+    await exec.exec("git", ["remote", "add", "pr", headCloneURL]);
+    await exec.exec("git", ["fetch", "pr", headBranch]);
+    await exec.exec("git", ["checkout", "-b", headBranch, `pr/${headBranch}`]);
   } catch (error) {
     core.setFailed(error.message);
   }

@@ -1,5 +1,5 @@
-name: 'pr-push'
-description: 'Push changes back to a Pull Request branch'
+name: 'pr-fetch'
+description: 'Fetch changes from a Pull Request branch'
 author: 'Jim Hester'
 inputs:
   repo-token:
