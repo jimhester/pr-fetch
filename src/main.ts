@@ -4,9 +4,9 @@ import * as exec from "@actions/exec";
 
 async function run() {
   try {
-    const client: github.GitHub = new github.GitHub(
-      core.getInput("repo-token", { required: true })
-    );
+    const token: string = core.getInput("repo-token", { required: true });
+
+    const client: github.GitHub = new github.GitHub(token);
 
     const context = github.context;
 
@@ -40,7 +40,12 @@ async function run() {
     const headBranch: string = pr.head.ref;
     const headCloneURL: string = pr.head.repo.clone_url;
 
-    await exec.exec("git", ["remote", "add", "pr", headCloneURL]);
+    const headCloneURL2: string = headCloneURL.replace(
+      "https://",
+      `https://x-access-token:${token}@`
+    );
+
+    await exec.exec("git", ["remote", "add", "pr", headCloneURL2]);
 
     await exec.exec("git", [
       "config",
