@@ -1,5 +1,5 @@
-name: 'Document R packages'
-description: 'Runs roxygen2::roxygenise() on an R package PR'
+name: 'pr-push'
+description: 'Push changes back to a Pull Request branch'
 author: 'Jim Hester'
 inputs:
   repo-token:
